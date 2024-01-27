@@ -24,6 +24,7 @@ def setup_db(app, database_path=database_path):
     db.init_app(app)
     with app.app_context():
         db.create_all()
+    
 
 
 """
@@ -63,3 +64,5 @@ class Book(db.Model):
             "author": self.author,
             "rating": self.rating,
         }
+
+    

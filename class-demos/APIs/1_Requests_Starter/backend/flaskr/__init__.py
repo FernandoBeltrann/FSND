@@ -16,21 +16,33 @@ BOOKS_PER_SHELF = 8
 #   - If you change any of the response body keys, make sure you update the frontend to correspond.
 
 
-def create_app(test_config=None):
+def paginate_books(request, selection):
+    page = request.args.get('page', 1, type=int)
+    start = (page - 1) * BOOKS_PER_SHELF
+    end = start + BOOKS_PER_SHELF
+
+    books = [book.format() for book in selection]
+    current_books = books[start:end]
+
+    return current_books
+
+def create_app(db_URI="", test_config=None):
     # create and configure the app
     app = Flask(__name__)
-    setup_db(app)
+    if db_URI:
+        print('Using NON-default Database')
+        setup_db(app, db_URI)
+    else:
+        print('Using Default Database')
+        setup_db(app)
+    
     CORS(app)
 
     # CORS Headers
     @app.after_request
     def after_request(response):
-        response.headers.add(
-            "Access-Control-Allow-Headers", "Content-Type,Authorization,true"
-        )
-        response.headers.add(
-            "Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS"
-        )
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,true")
+        response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
         return response
 
     # -Get all books with pagination-
@@ -46,15 +58,17 @@ def create_app(test_config=None):
     def get_books():
         books = Book.query.all()
 
-        page = request.args.get('page', 1, type=int)
-        start = (page - 1) * BOOKS_PER_SHELF
-        end = start + BOOKS_PER_SHELF
-        formatted_books = [book.format() for book in books]
+        current_books = paginate_books(request, books)
+
+        if len(current_books) == 0:
+            abort(404)
+
+
         response_json = json.dumps({
 
-            'books': formatted_books[start:end],
-            'total_books': len(formatted_books),
             'success': True,
+            'books': current_books,
+            'total_books': len(books)
             
         }, indent=2)  # Sets the indentation level to 2 spaces
         return Response(response_json, mimetype='application/json')
@@ -74,16 +88,37 @@ def create_app(test_config=None):
 
         data = request.get_json()
         rating = data.get('rating')
-        result = Book.query.filter(Book.id == id).update({"rating": rating})
 
-        response_json = json.dumps({
-            'success': True
-        })  
+        try:
+            result = Book.query.filter(Book.id == id).one_or_none()
+            if result is None:
+                abort(404)
 
-        if result:
-            return jsonify(success=True)
-        else:
-            return jsonify(success=False, error="Book not found"), 404
+            result.rating = int(rating)
+            result.update()
+        
+            response_json = json.dumps({
+
+                'success': True,
+                'id': id
+                
+            }, indent=2)  # Sets the indentation level to 2 spaces
+            return Response(response_json, mimetype='application/json')
+
+
+        except:
+            #return jsonify(success=False, error="Book not found"), 404
+            # return jsonify({
+            #     'success': False
+            # }),404 
+
+            response_json = json.dumps({
+
+                    'success': False,
+                    
+            }, indent=2),404  # Sets the indentation level to 2 spaces
+            return Response(response_json, mimetype='application/json')
+                
 
 
     # @TODO: Write a route that will delete a single book.
@@ -92,45 +127,65 @@ def create_app(test_config=None):
 
     # TEST: When completed, you will be able to delete a single book by clicking on the trashcan.
         
-    @app.route('/books/<int:id>', methods = ['DELETE'])
+    # @app.route('/books/<int:id>', methods = ['DELETE'])
+    # def delete_book(id):
+
+    #     try:
+    #         book = Book.query.get(id)
+    #         book.delete()
+            
+    #         books = Book.query.all()
+    #         formatted_books = [book.format() for book in books]
+    #         response_json = json.dumps({
+
+    #             'books': formatted_books,
+    #             'success': True,
+    #             'deleted_id': id,
+    #             'total_books': len(books)
+
+    #         }, indent=2)
+    #         return response_json
+        
+    #     except Exception as e:
+
+    #         books = Book.query.all()
+    #         formatted_books = [book.format() for book in books]
+
+    #         response_json = json.dumps({
+
+    #             'success': False,
+    #             'books': formatted_books,
+    #             'total_books': len(books),
+    #             'error': str(e)
+
+    #         })
+            
+    #         return response_json
+        
+    @app.route('/books/<int:id>', methods=['DELETE'])
     def delete_book(id):
-
         book = Book.query.get(id)
-        book.delete()
-
-        books = Book.query.all()
-        formatted_books = [book.format() for book in books]
-
-
+        if book is None:
+            return jsonify({'success': False, 'message': 'Book not found'}), 404
 
         try:
             book.delete()
-            
-            formatted_books = [book.format() for book in books]
-            books = Book.query.all()
-            response_json = json.dumps({
 
+            books = Book.query.order_by(Book.id).all()
+            current_books = [book.format() for book in books]
+
+            return jsonify({
                 'success': True,
-                'deleted': id,
-                'books': formatted_books,
+                'deleted_id': id,
+                'books': current_books,
                 'total_books': len(books)
-
-            })  
-
-            return response_json
-        
+            }), 200
         except Exception as e:
-
-            response_json = json.dumps({
-
+            return jsonify({
                 'success': False,
-                'books': formatted_books,
-                'total_books': len(books),
                 'error': str(e)
+            }), 422
 
-            })
-            
-            return response_json
 
 
     # @TODO: Write a route that create a new book.
@@ -142,28 +197,63 @@ def create_app(test_config=None):
     def add_book():
 
         data = request.get_json()
-        title = data.get('title')
-        author = data.get('author')
-        rating = data.get('rating')
+        new_title = data.get('title', None)
+        new_author = data.get('author', None)
+        new_rating = data.get('rating', None)
 
-        new_book = Book(title=title, author=author, rating=rating)
-        id = new_book.id
-        new_book.insert()
+        try:
+            new_book = Book(title=new_title, author=new_author, rating=new_rating)
+            new_book.insert()
         
-        books = Book.query.all()
-        formatted_books = [book.format() for book in books]
+            books = Book.query.order_by(Book.id).all()
 
-        response_json = json.dumps({
+            current_books = paginate_books(request, books)
 
-            'success': True,
-            'created': id,
-            'books': formatted_books,
-            'total_books': len(books)
-        })  
+            response_json = json.dumps({
+                'books': current_books,
+                'success': True,
+                'created_id': new_book.id,
+                'total_books': len(books)
+            }, indent=2)  
 
-        if new_book:
             return response_json
-        else:
-            return jsonify(success=False, error="Book not created"), 404
+
+        except:
+            return jsonify(success=False, error="Book not created"), 422
+        
+
+    
+    
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            'success': False,
+            'error': 400,
+            'message': "bad request"
+        }), 400
+    
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            'success': False,
+            'error': 404,
+            'message': "resource not found"
+        }), 404
+    
+    @app.errorhandler(405)
+    def wrong_method(error):
+        return jsonify({
+            'success': False,
+            'error': 405,
+            'message': "method not allowed"
+        }), 405
+    
+    @app.errorhandler(422)
+    def unprocesable(error):
+        return jsonify({
+            'success': False,
+            'error': 422,
+            'message': "unprocessable"
+        }), 422
 
     return app
