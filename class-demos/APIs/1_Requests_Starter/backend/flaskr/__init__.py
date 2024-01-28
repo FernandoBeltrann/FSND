@@ -195,25 +195,37 @@ def create_app(db_URI="", test_config=None):
         
     @app.route('/books', methods = ['POST'])
     def add_book():
-
         data = request.get_json()
+
         new_title = data.get('title', None)
         new_author = data.get('author', None)
         new_rating = data.get('rating', None)
+        search = data.get('search', None)
 
         try:
-            new_book = Book(title=new_title, author=new_author, rating=new_rating)
-            new_book.insert()
-        
-            books = Book.query.order_by(Book.id).all()
+            if search:
+                selection = Book.query.order_by(Book.id).filter(Book.title.ilike('%{}%'.format(search)))
+                current_books = paginate_books(request, selection)
 
-            current_books = paginate_books(request, books)
+                return jsonify({
+                    'success': True,
+                    'books': current_books,
+                    'total_books': len(selection.all())
+                })
+
+            else:
+                book = Book(title=new_title, author=new_author, rating=new_rating)
+                book.insert()
+
+                selection = Book.query.order_by(Book.id).all()
+                current_books = paginate_books(request, selection)
+
 
             response_json = json.dumps({
                 'books': current_books,
                 'success': True,
-                'created_id': new_book.id,
-                'total_books': len(books)
+                'created_id': book.id,
+                'total_books': len(Book.query.all())
             }, indent=2)  
 
             return response_json
