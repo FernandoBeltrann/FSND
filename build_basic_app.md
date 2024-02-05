@@ -4,9 +4,9 @@
 #### Set up
 
 ```bash
-pip install -r requirements.txt
-```
 
+```
+https://flask-migrate.readthedocs.io/en/latest/
 
 ### Installing Dependencies for the Backend
 
