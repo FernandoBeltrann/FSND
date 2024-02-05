@@ -1,4 +1,4 @@
-# Backend - Full Stack Trivia API 
+# Build basic app
 
 ### Migrations
 #### Set up
@@ -62,8 +62,14 @@ flask db downgrade
 
 
 #### More
-More documentation here:
+More detail and documentation here:
 https://flask-migrate.readthedocs.io/en/latest/
+
+The main documentations site for Alembic with complete references for everything:
+https://alembic.sqlalchemy.org/en/latest/
+
+
+
 
 ### Installing Dependencies for the Backend
 
