@@ -1,17 +1,33 @@
 import os
-from flask import Flask, request, abort, jsonify
+import json
+from flask import Flask, Response,request, abort, jsonify
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
-from models import setup_db, Question, Category
+from models import setup_db, db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
+
+def paginate_questions(request, selection):
+    page = request.args.get('page', 1, type=int)
+    start = (page - 1) * QUESTIONS_PER_PAGE
+    end = start + QUESTIONS_PER_PAGE
+
+    questions = [book.format() for book in selection]
+    current_questions = questions[start:end]
+
+    return current_questions
 
 def create_app(test_config=None):
   # create and configure the app
   app = Flask(__name__)
   setup_db(app)
+  migrate = Migrate(app,db)
+
+  #with app.app_context():
+  #  db.create_all()
   
   '''
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
@@ -34,6 +50,34 @@ def create_app(test_config=None):
   including pagination (every 10 questions). 
   This endpoint should return a list of questions, 
   number of total questions, current category, categories. 
+'''
+
+  @app.route('/questions', methods = ['GET'])
+  def get_questions():
+      page = request.args.get('page', 1, type=int)
+
+      questions = Question.query.all()
+      categories = Category.query.all()
+
+      current_questions = paginate_questions(request, questions)
+
+      if len(current_questions) == 0:
+            abort(404)
+
+
+      response_json = json.dumps({
+
+          'success': True,
+          'questions': current_questions,
+          'total_questions': len(questions),
+          'current_category': questions.category,
+          'categories': categories
+            
+      }, indent=2)  # Sets the indentation level to 2 spaces
+      return Response(response_json, mimetype='application/json')
+
+  '''
+
 
   TEST: At this point, when you start the application
   you should see questions and categories generated,
