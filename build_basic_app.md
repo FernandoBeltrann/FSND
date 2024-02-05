@@ -4,6 +4,9 @@
 #### Set up
 
 ```bash
+from flask_migrate import Migrate
+
+migrate = Migrate(app,db)
 
 ```
 https://flask-migrate.readthedocs.io/en/latest/
