@@ -40,9 +40,26 @@ In your terminal locate yourself in the directory where the app file is located 
 flask db init
 ```
 
-This should create a folder with the name `migrations` where all the versions should get stored, it is important to excecute this command when located in the same file as the app, if not this will not work.
+This should create a folder with the name `migrations` where all the versions should get stored, it is important to excecute this command when located in the same file as the app, if not this will not work. 
 
-Next
+This command will also create the columns of the tables and restrictions of them if already set in the `models` file.
+
+After making changes in the schema run this command to make a provisional change in the schema:
+```bash
+flask db migrate
+```
+
+Finally if you are satisfied with the changes you can run the following command to apply the changes:
+```bash
+flask db upgrade
+```
+
+If something did not work and want to make a `Ctrl + Z` to your schema you can always run the following command as many times back as you would like to go back versions:
+```bash
+flask db downgrade
+```
+
+
 
 #### More
 More documentation here:
