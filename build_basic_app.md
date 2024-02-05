@@ -3,12 +3,42 @@
 ### Migrations
 #### Set up
 
+In the app file this should be present:
+
 ```bash
 from flask_migrate import Migrate
 
 migrate = Migrate(app,db)
 
 ```
+
+The app and db should be instanced before, like in this snip code:
+
+```bash
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = database_URI
+
+migrate = Migrate(app,db)
+
+```
+
+#### Terminal commands
+
+First install Flask-Migrate as follows if this library is not already installed in the `requirements.txt ` file
+
+In your terminal locate yourself in the directory where the app file is located and then execute the following commands: 
+
+```bash
+
+
+```
+
+#### More
+More documentation here:
 https://flask-migrate.readthedocs.io/en/latest/
 
 ### Installing Dependencies for the Backend
