@@ -1,5 +1,31 @@
 # Build basic app
 
+### File structure for a flask app
+
+```bash
+├── flaskr/
+│   ├── __init__.py
+│   ├── templates/
+│   │   ├── base.html
+│   │   ├── auth/
+│   │   │   ├── login.html
+│   │   │   └── register.html
+│   │   └── blog/
+│   │       ├── create.html
+│   │       ├── index.html
+│   │       └── update.html
+│   └── static/
+│       └── style.css
+├── tests/
+│   ├── conftest.py
+│   ├── data.sql
+│   ├── test_factory.py
+│   ├── test_db.py
+│   ├── test_auth.py
+│   └── test_blog.py
+└── .venv/
+```
+
 ### Migrations
 #### Set up
 
