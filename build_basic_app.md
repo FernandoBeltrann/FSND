@@ -30,12 +30,19 @@ migrate = Migrate(app,db)
 
 First install Flask-Migrate as follows if this library is not already installed in the `requirements.txt ` file
 
+```bash
+pip install Flask-Migrate
+```
+
 In your terminal locate yourself in the directory where the app file is located and then execute the following commands: 
 
 ```bash
-
-
+flask db init
 ```
+
+This should create a folder with the name `migrations` where all the versions should get stored, it is important to excecute this command when located in the same file as the app, if not this will not work.
+
+Next
 
 #### More
 More documentation here:
