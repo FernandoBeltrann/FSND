@@ -96,7 +96,14 @@ https://alembic.sqlalchemy.org/en/latest/
 ### CORS
 
 
+### Test the API enpoints (CURL)
 
+Use the CURL commands to test out in terminal the expected return of API
+
+```bash
+curl -X GET https://restcountries.com/v3.1/currency/cop
+
+```
 
 ### Installing Dependencies for the Backend
 
