@@ -104,6 +104,7 @@ pip install flask-cors
 
 In the app you should import the CORS library and instance it in the `create_app` method :
 ```bash
+from flask import
 from flask_cors import CORS
 from models import setup_db
 
@@ -122,6 +123,9 @@ def create_app(test_config=None):
     @cross_origin()
     def helloWorld():
         return "Hello, cross-origin-world!"
+
+
+return app
 
 ```
 `@app.after_request` means that the app should run this after the app is runned.
