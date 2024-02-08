@@ -121,8 +121,10 @@ def create_app(test_config=None):
 
 ```
 `@app.after_request` means that the app should run this after the app is runned.
-`response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')`
-`response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')`
+
+`response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')`: state that 2 things will be allowed, in the header we will allow content and authorization.
+
+`response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')`: states what methods you plan to allow.
 
 
 
