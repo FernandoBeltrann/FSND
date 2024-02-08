@@ -94,6 +94,36 @@ The main documentations site for Alembic with complete references for everything
 https://alembic.sqlalchemy.org/en/latest/
 
 ### CORS
+CORS 
+
+First install the flask-cors library
+```bash
+pip install flask-cors
+
+```
+
+In the app you should import the CORS library and instance it in the `create_app` method :
+```bash
+from flask_cors import CORS
+from models import setup_db
+
+def create_app(test_config=None):
+    app = Flask(__name__)
+    setup_db(app)
+    CORS(app)
+
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
+
+
+
+```
+`@app.after_request` means that the app should run this after the app is runned.
+`response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')`
+`response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')`
+
 
 
 ### Test the API enpoints (CURL)
