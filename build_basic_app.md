@@ -116,8 +116,12 @@ def create_app(test_config=None):
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
+        return response
 
-
+    @app.route("/")
+    @cross_origin()
+    def helloWorld():
+        return "Hello, cross-origin-world!"
 
 ```
 `@app.after_request` means that the app should run this after the app is runned.
@@ -125,6 +129,8 @@ def create_app(test_config=None):
 `response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')`: state that 2 things will be allowed, in the header we will allow content and authorization.
 
 `response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')`: states what methods you plan to allow.
+
+`@cross_origin()`: when we add this it will apply the CORS to only the methods that have this instruction 
 
 
 
