@@ -136,6 +136,8 @@ return app
 
 `@cross_origin()`: when we add this it will apply the CORS to only the methods that have this instruction 
 
+#### More
+https://flask-cors.readthedocs.io/en/latest/#
 
 
 ### Test the API enpoints (CURL)
