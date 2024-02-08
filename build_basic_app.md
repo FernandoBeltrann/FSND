@@ -3,6 +3,11 @@
 ### File structure for a flask app
 
 ```bash
+
+│  models.py    
+└──flaskr
+   └── __init__.py
+
 ├── flaskr/
 │   ├── __init__.py
 │   ├── templates/
