@@ -6,6 +6,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
+from sqlalchemy import func
+
 from models import setup_db, db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
@@ -25,17 +27,19 @@ def create_app(test_config=None):
   app = Flask(__name__)
   setup_db(app)
   migrate = Migrate(app,db)
-
-  #with app.app_context():
-  #  db.create_all()
+  CORS(app, resources={r"/*": {"origins": "*"}})
   
   '''
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
-  '''
 
-  '''
   @TODO: Use the after_request decorator to set Access-Control-Allow
   '''
+
+  @app.after_request
+  def after_request(response):
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
+    return response
 
   '''
   @TODO: 
@@ -43,6 +47,23 @@ def create_app(test_config=None):
   for all available categories.
   '''
 
+  
+  @app.route('/categories', methods = ['GET'])
+  def get_categories():
+      categories = Category.query.all()
+
+      categories = [category.format() for category in categories]
+
+      response_json = json.dumps({
+
+          'success': True,
+          'categories': categories
+          #'total_questions': len(categories)
+            
+      }, indent=2)  # Sets the indentation level to 2 spaces
+      print(response_json)
+      return Response(response_json, mimetype='application/json')
+  
 
   '''
   @TODO: 
@@ -59,6 +80,8 @@ def create_app(test_config=None):
       questions = Question.query.all()
       categories = Category.query.all()
 
+      categories = [format(category) for category in categories]
+
       current_questions = paginate_questions(request, questions)
 
       if len(current_questions) == 0:
@@ -70,8 +93,8 @@ def create_app(test_config=None):
           'success': True,
           'questions': current_questions,
           'total_questions': len(questions),
-          'current_category': questions.category,
           'categories': categories
+          #'current_category': questions.category
             
       }, indent=2)  # Sets the indentation level to 2 spaces
       return Response(response_json, mimetype='application/json')
@@ -93,6 +116,30 @@ def create_app(test_config=None):
   This removal will persist in the database and when you refresh the page. 
   '''
 
+  @app.route('/questions/<int:id>', methods = ['DELETE'])
+  def delete_question(id):
+        
+      question = Question.query.filter_by(id=id).one()
+      question.delete()
+
+      current_questions = Question.query.all()
+      current_questions = [format(question) for question in current_questions]
+
+      categories = Category.query.all()
+      categories = [format(category) for category in categories]
+
+
+      response_json = json.dumps({
+
+        'success': True,
+        'questions': current_questions,
+        'total_questions': len(current_questions),
+        'categories': categories
+        #'current_category': questions.category
+            
+      }, indent=2)  # Sets the indentation level to 2 spaces
+      return Response(response_json, mimetype='application/json')
+
   '''
   @TODO: 
   Create an endpoint to POST a new question, 
@@ -103,6 +150,25 @@ def create_app(test_config=None):
   the form will clear and the question will appear at the end of the last page
   of the questions list in the "List" tab.  
   '''
+  @app.route('/questions', methods=['POST'])
+  def add_question():
+    data = request.get_json()  # This gets the JSON data sent in the request body
+    question = data['question']
+    answer = data['answer']
+    difficulty = data['difficulty']
+    category = data['category']
+
+    new_question = Question(question=question, answer=answer, difficulty=difficulty, category=category)
+    new_question.insert()
+
+    response_json = json.dumps({
+
+        'success': True
+            
+      }, indent=2)  # Sets the indentation level to 2 spaces
+    return Response(response_json, mimetype='application/json')
+
+
 
   '''
   @TODO: 
@@ -115,6 +181,36 @@ def create_app(test_config=None):
   Try using the word "title" to start. 
   '''
 
+  @app.route('/questions/search', methods=['POST'])
+  def search_question():
+    data = request.get_json()  # This gets the JSON data sent in the request body
+    searchTerm = data['searchTerm']
+    print('Search Term:', searchTerm)
+
+    questions = Question.query.filter(Question.question.ilike(f'%{searchTerm}%')).all()
+    print('Questions Found:', questions)  # Debug print
+    #categories = Category.query.filter(Category.id in (questions.category))
+
+    # Assuming Category.id is an Integer
+    category_ids = [q.category for q in questions]  # This assumes that `category` is storing the category ID
+    categories = Category.query.filter(Category.id.in_(category_ids)).all()
+
+
+    questions = [question.format() for question in questions ]
+    categories = [category.format() for category in categories ]
+
+
+    response_json = json.dumps({
+
+        'questions': questions,
+        'totalQuestions': len(questions),
+        'currentCategory':categories,
+        'success': True
+            
+      }, indent=2)  # Sets the indentation level to 2 spaces
+    return Response(response_json, mimetype='application/json')
+
+
   '''
   @TODO: 
   Create a GET endpoint to get questions based on category. 
@@ -123,7 +219,27 @@ def create_app(test_config=None):
   categories in the left column will cause only questions of that 
   category to be shown. 
   '''
+  @app.route('/categories/<int:id>/questions', methods=['GET'])
+  def get_q_for_category(id):
 
+    questions = Question.query.filter(Question.category == id).all()
+
+    category_ids = [q.category for q in questions]  # This assumes that `category` is storing the category ID
+    categories = Category.query.filter(Category.id.in_(category_ids)).all()
+
+    questions = [question.format() for question in questions]
+    categories = [category.format() for category in categories]
+
+    response_json = json.dumps({
+
+        'questions': questions,
+        'totalQuestions': len(questions),
+        'currentCategory':categories,
+        'success': True
+            
+      }, indent=2)  # Sets the indentation level to 2 spaces
+    return Response(response_json, mimetype='application/json') 
+     
 
   '''
   @TODO: 
@@ -136,12 +252,65 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
+  @app.route('/quizzes', methods=['POST'])
+  def get_questions_for_quiz():
+    data = request.get_json()
+    previous_questions = data['previous_questions']
+    quiz_category = data['quiz_category']
+
+    try:
+        # Assume quiz_category is an object with 'id' key, and you want to compare with category ID
+        category_id = int(quiz_category['id']) if quiz_category['id'] > 0 else None
+        
+        # Filter questions based on the category (if specified) and that are not in previous_questions
+        if category_id:
+            new_question_query = Question.query.filter(Question.category == category_id, ~Question.id.in_(previous_questions))
+        else:
+            new_question_query = Question.query.filter(~Question.id.in_(previous_questions))
+        
+        new_question = new_question_query.order_by(func.random()).first()
+
+        if new_question:
+            formatted_question = new_question.format()
+        else:
+            formatted_question = None
+
+        response_json = json.dumps({
+            'question': formatted_question,
+            'success': True
+        }, indent=2)
+        return Response(response_json, mimetype='application/json')
+    except Exception as e:
+        # Handle the exception in an appropriate way, such as logging it and returning an error response
+        response_json = json.dumps({
+            'success': False,
+            'error': str(e)
+        }, indent=2)
+        return Response(response_json, mimetype='application/json', status=500)
+
+
 
   '''
   @TODO: 
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
+  @app.errorhandler(404)
+  def error404(error):
+    response_json = json.dumps({
+            'success': False,
+            'error': 'Resource not found'
+            })
+    return Response(response_json, mimetype='application/json', status=404)
+
+
+  @app.errorhandler(422)
+  def error422(error):
+     response_json = json.dumps({
+            'success': False,
+            'error': 'Unprocesable Resource'
+            })
+     return Response(response_json, mimetype='application/json', status=422)
   
   return app
 

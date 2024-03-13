@@ -12,9 +12,9 @@ class QuizView extends Component {
         quizCategory: null,
         previousQuestions: [],
         showAnswer: false,
-        categories: {},
+        categories: [],
         numCorrect: 0,
-        currentQuestion: {},
+        currentQuestion: [],
         guess: '',
         forceEnd: false
     }
@@ -101,16 +101,16 @@ class QuizView extends Component {
               <div className="choose-header">Choose Category</div>
               <div className="category-holder">
                   <div className="play-category" onClick={this.selectCategory}>ALL</div>
-                  {Object.keys(this.state.categories).map(id => {
-                  return (
-                    <div
-                      key={id}
-                      value={id}
-                      className="play-category"
-                      onClick={() => this.selectCategory({type:this.state.categories[id], id})}>
-                      {this.state.categories[id]}
+                  {this.state.categories.map((category) => { // Ensure 'category' is defined in the map function
+                    return (
+                      <div
+                        key={category.id} // 'category' is now recognized in this scope
+                        value={category.id}
+                        className="play-category"
+                        onClick={() => this.selectCategory({ type: category.type, id: category.id })}>
+                      {category.type} 
                     </div>
-                  )
+                  );
                 })}
               </div>
           </div>
@@ -160,7 +160,6 @@ class QuizView extends Component {
           </div>
         )
   }
-
 
   render() {
     return this.state.quizCategory

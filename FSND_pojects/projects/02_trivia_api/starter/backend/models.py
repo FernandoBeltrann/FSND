@@ -80,3 +80,4 @@ class Category(db.Model):
       'id': self.id,
       'type': self.type
     }
+  
