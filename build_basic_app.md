@@ -3,6 +3,11 @@
 ### File structure for a flask app
 
 ```bash
+
+│  models.py    
+└──flaskr
+   └── __init__.py
+
 ├── flaskr/
 │   ├── __init__.py
 │   ├── templates/
@@ -86,7 +91,6 @@ flask db downgrade
 ```
 
 
-
 #### More
 More detail and documentation here:
 https://flask-migrate.readthedocs.io/en/latest/
@@ -94,8 +98,61 @@ https://flask-migrate.readthedocs.io/en/latest/
 The main documentations site for Alembic with complete references for everything:
 https://alembic.sqlalchemy.org/en/latest/
 
+### CORS
+CORS 
+
+First install the flask-cors library
+```bash
+pip install flask-cors
+
+```
+
+In the app you should import the CORS library and instance it in the `create_app` method :
+```bash
+from flask import
+from flask_cors import CORS
+from models import setup_db
+
+def create_app(test_config=None):
+    app = Flask(__name__)
+    setup_db(app)
+    CORS(app)
+
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
+        return response
+
+    @app.route("/")
+    @cross_origin()
+    def helloWorld():
+        return "Hello, cross-origin-world!"
 
 
+return app
+
+```
+`@app.after_request` means that the app should run this after the app is runned.
+
+`response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')`: state that 2 things will be allowed, in the header we will allow content and authorization.
+
+`response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')`: states what methods you plan to allow.
+
+`@cross_origin()`: when we add this it will apply the CORS to only the methods that have this instruction 
+
+#### More
+https://flask-cors.readthedocs.io/en/latest/#
+
+
+### Test the API enpoints (CURL)
+
+Use the CURL commands to test out in terminal the expected return of API
+
+```bash
+curl -X GET https://restcountries.com/v3.1/currency/cop
+
+```
 
 ### Installing Dependencies for the Backend
 
