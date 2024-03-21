@@ -4,6 +4,7 @@ from flask import Flask, Response,request, abort, jsonify
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from sqlalchemy import select
 import random
 
 from sqlalchemy import func
@@ -80,8 +81,8 @@ def create_app(test_config=None):
       questions = Question.query.all()
       categories = Category.query.all()
 
-      categories = [format(category) for category in categories]
-
+      categories = [category.subject for category in categories]
+      
       current_questions = paginate_questions(request, questions)
 
       if len(current_questions) == 0:
@@ -158,7 +159,7 @@ def create_app(test_config=None):
     difficulty = data['difficulty']
     category = data['category']
 
-    new_question = Question(question=question, answer=answer, difficulty=difficulty, category=category)
+    new_question = Question(question=question, answer=answer, difficulty=difficulty, category=category-1)
     new_question.insert()
 
     response_json = json.dumps({
