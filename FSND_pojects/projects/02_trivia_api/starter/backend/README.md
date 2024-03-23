@@ -165,7 +165,7 @@ The API will return four error types when requests fail:
 - Returns: JSON object with a list of questions for the specified category.
 
 #### POST `/quizzes`
-- Fetches a question for the quiz, excluding previously asked questions.
+- Fetches a questions for the quiz, excluding previously asked questions.
 - Request Arguments: None
 - Request Body: JSON object including the quiz category and an array of previous question IDs.
 - Returns: JSON object with a question that has not been asked before in the quiz.
