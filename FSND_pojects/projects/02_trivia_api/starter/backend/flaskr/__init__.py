@@ -29,6 +29,10 @@ def create_app(test_config=None):
   setup_db(app)
   migrate = Migrate(app,db)
   CORS(app, resources={r"/*": {"origins": "*"}})
+  app.config['FLASK_ENV'] = os.environ.get('FLASK_ENV')
+  app.config['FLASK_APP'] = os.environ.get('FLASK_APP')
+  app.config['FLASK_DEBUG'] = os.environ.get('FLASK_DEBUG')
+
   
   '''
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
