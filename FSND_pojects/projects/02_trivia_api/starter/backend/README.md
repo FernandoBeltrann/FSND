@@ -109,3 +109,66 @@ createdb trivia_test
 psql trivia_test < trivia.psql
 python test_flaskr.py
 ```
+
+## API Reference
+
+### Getting Started
+- Base URL: The base URL is dynamically set based on the deployment environment. For development, it might be `http://127.0.0.1:5000/`.
+- Authentication: This version of the application does not require authentication or API keys.
+
+### Error Handling
+Errors are returned as JSON objects in the following format:
+```json
+{
+  "success": false,
+  "error": 400,
+  "message": "bad request"
+}
+```
+The API will return four error types when requests fail:
+- 400: Bad Request
+- 404: Resource Not Found
+- 422: Not Processable
+- 500: Internal Server Error
+
+### Endpoints
+#### GET `/categories`
+- Fetches a dictionary of all available question categories.
+- Request Arguments: None
+- Returns: An object with a single key, `categories`, that contains an object of `id: category_string` key:value pairs.
+
+#### GET `/questions`
+- Fetches a paginated list of questions.
+- Request Arguments: `page` - integer, specifies the page of questions to return.
+- Returns: A list of questions, number of total questions, current category, all categories.
+
+#### DELETE `/questions/<question_id>`
+- Deletes a specified question using the id of the question.
+- Request Arguments: `question_id` - integer
+- Returns: JSON object with the id of the deleted question.
+
+#### POST `/questions`
+- Creates a new question.
+- Request Arguments: None
+- Request Body: JSON object including the question text, answer text, category, and difficulty score.
+- Returns: JSON object with the created question.
+
+#### POST `/questions/search`
+- Fetches questions based on a search term.
+- Request Arguments: None
+- Request Body: JSON object including the search term.
+- Returns: Any questions for whom the search term is a substring of the question.
+
+#### GET `/categories/<category_id>/questions`
+- Fetches questions for a specific category.
+- Request Arguments: `category_id` - integer
+- Returns: JSON object with a list of questions for the specified category.
+
+#### POST `/quizzes`
+- Fetches a question for the quiz, excluding previously asked questions.
+- Request Arguments: None
+- Request Body: JSON object including the quiz category and an array of previous question IDs.
+- Returns: JSON object with a question that has not been asked before in the quiz.
+
+### Error Handlers
+The API provides custom error handlers for 400, 404, 422, and 500 errors, returning JSON-formatted error responses.
