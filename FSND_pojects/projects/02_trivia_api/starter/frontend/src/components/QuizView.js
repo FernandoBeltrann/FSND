@@ -33,8 +33,8 @@ class QuizView extends Component {
     })
   }
 
-  selectCategory = ({subject, id=0}) => {
-    this.setState({quizCategory: {subject, id}}, this.getNextQuestion)
+  selectCategory = ({type, id=0}) => {
+    this.setState({quizCategory: {type, id}}, this.getNextQuestion)
   }
 
   handleChange = (event) => {
@@ -107,8 +107,8 @@ class QuizView extends Component {
                         key={category.id} // 'category' is now recognized in this scope
                         value={category.id}
                         className="play-category"
-                        onClick={() => this.selectCategory({ type: category.subject, id: category.id })}>
-                      {category.subject} 
+                        onClick={() => this.selectCategory({ type: category.type, id: category.id })}>
+                      {category.type} 
                     </div>
                   );
                 })}

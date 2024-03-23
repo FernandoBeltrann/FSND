@@ -85,7 +85,7 @@ def create_app(test_config=None):
       questions = Question.query.all()
       categories = Category.query.all()
 
-      categories = [category.subject for category in categories]
+      categories = [category.type for category in categories]
       
       current_questions = paginate_questions(request, questions)
 

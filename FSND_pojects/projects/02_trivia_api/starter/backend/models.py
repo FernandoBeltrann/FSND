@@ -68,14 +68,14 @@ class Category(db.Model):
   __tablename__ = 'categories'
 
   id = Column(Integer, primary_key=True)
-  subject = Column(String)
+  type = Column(String)
 
-  def __init__(self, subject):
-    self.subject = self.subject
+  def __init__(self, type):
+    self.type = self.type
 
   def format(self):
     return {
       'id': self.id,
-      'subject': self.subject
+      'type': self.type
     }
   
