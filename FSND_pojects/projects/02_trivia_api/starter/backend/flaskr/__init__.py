@@ -163,7 +163,7 @@ def create_app(test_config=None):
     difficulty = data['difficulty']
     category = data['category']
 
-    new_question = Question(question=question, answer=answer, difficulty=difficulty, category=category-1)
+    new_question = Question(question=question, answer=answer, difficulty=difficulty, category=category)
     new_question.insert()
 
     response_json = json.dumps({
@@ -228,6 +228,10 @@ def create_app(test_config=None):
   def get_q_for_category(id):
 
     questions = Question.query.filter(Question.category == id).all()
+
+    #questions = select(Question).where(Question.category == 'Sports')
+
+
 
     category_ids = [q.category for q in questions]  # This assumes that `category` is storing the category ID
     categories = Category.query.filter(Category.id.in_(category_ids)).all()
