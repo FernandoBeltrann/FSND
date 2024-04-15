@@ -3,6 +3,7 @@ __pycache__
 venv
 .env
 FSNDenv
+DellFSNDenv
 
 # OS generated files #
 ######################
