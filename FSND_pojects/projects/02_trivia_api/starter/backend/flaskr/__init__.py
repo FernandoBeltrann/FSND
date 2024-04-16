@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Flask, Response,request, abort, jsonify
+from flask import Flask, Response, request, abort, jsonify
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
